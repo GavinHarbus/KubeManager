@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ReplicationController
+metadata: 
+  name: myweb
+spec:
+  replicas: 1
+  selector:
+    app: myweb
+  template:
+    spec:
+      containers:
+      - name: myweb
+        image: kubeguide/tomcat-app:v1
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MYSQL_SERVICE_HOST
+          value: "mysql"
+        - name: MYSQL_SERVICE_PORT
+          value: "13306"
+    metadata:
+      labels:
+        app: myweb

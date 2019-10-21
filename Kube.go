@@ -16,51 +16,65 @@ import (
 	"io/ioutil"
 )
 
-//const confPath string = "./conf/pathconf.json"
+const confPath string = "./conf/pathconf.json"
 
 type Kube struct {
 	SystemPath string `json:"systemPath"`
 	KubePath string `json:"kubePath"`
 }
 
-func (kube *Kube) getNodes() {
+func (kube *Kube) getNodes() (output []byte, err error) {
 	cmd := exec.Command(kube.KubePath+"kubectl","get","nodes")
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println(string(output))
+	output, err = cmd.CombinedOutput()
+	return output, err
 }
 
-func (kube *Kube) getPods() {
+func (kube *Kube) getPods() (output []byte, err error) {
 	cmd := exec.Command(kube.KubePath+"kubectl","get","pods")
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println(string(output))
+	output, err = cmd.CombinedOutput()
+	return output, err
 }
 
-func (kube *Kube) getRc() {
+func (kube *Kube) getRc() (output []byte, err error) {
 	cmd := exec.Command(kube.KubePath+"kubectl","get","rc")
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println(string(output))
+	output, err = cmd.CombinedOutput()
+	return output, err
 }
 
-func (kube *Kube) getImages() {
+func (kube *Kube) getSvc() (output []byte, err error) {
+	cmd := exec.Command(kube.KubePath+"kubectl","get","svc")
+	output, err = cmd.CombinedOutput()
+	return output, err
+}
+
+func (kube *Kube) getJobs() (output []byte, err error) {
+	cmd := exec.Command(kube.KubePath+"kubectl","get","jobs")
+	output, err = cmd.CombinedOutput()
+	return output, err
+}
+
+func (kube *Kube) getClusters() (output []byte, err error) {
+	cmd := exec.Command(kube.KubePath+"kubectl","get","clusters")
+	output, err = cmd.CombinedOutput()
+	return output, err
+}
+
+func (kube *Kube) create(yamlPath string) (output []byte, err error) {
+	cmd := exec.Command(kube.KubePath+"kubectl","create","-f",yamlPath)
+	output, err = cmd.CombinedOutput()
+	return output, err
+}
+
+func (kube *Kube) delete(yamlPath string) (output []byte, err error) {
+	cmd := exec.Command(kube.KubePath+"kubectl","delete","-f",yamlPath)
+	output, err = cmd.CombinedOutput()
+	return output, err
+}
+
+func (kube *Kube) getImages() (output []byte, err error) {
 	cmd := exec.Command(kube.KubePath+"docker","images")
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println(string(output))
+	output, err = cmd.CombinedOutput()
+	return output, err
 }
 
 func (kube *Kube) getTest() {
@@ -73,7 +87,7 @@ func (kube *Kube) getTest() {
 	fmt.Println(string(output))
 }
 
-func (kube *Kube) load(confPath string) bool {
+func (kube *Kube) load() bool {
 	if file, err := ioutil.ReadFile(confPath); err == nil {
 		err = json.Unmarshal(file,kube);
 		if err != nil {
