@@ -12,9 +12,9 @@
   <body>
     <div class="container-fluid">
       <div class="row">
-        <div class="col-md-4 col-md-offset-2">
+        <div class="col-md-1 col-md-offset-3">
           <form action="/get" method="post">
-            <div class="btn-group" role="group">
+            <div class="btn-group-vertical" role="group">
               <button type="submit" class="btn btn-default" name="kubegetcommand" value="0">GetNode</button>
               <button type="submit" class="btn btn-default" name="kubegetcommand" value="1">GetRc</button>
               <button type="submit" class="btn btn-default" name="kubegetcommand" value="2">GetPod</button>
@@ -24,15 +24,28 @@
             </div>
           </form>  
         </div>
+
+        <div class="col-md-5">
+          <div class="panel panel-default">
+            <!-- Default panel contents -->
+            <div class="panel-heading text-center">{{ .content }}</div>
+
+            <!-- Table -->
+            <div class="table-responsive">
+              <table id="result" class="table table-condensed table-bordered table-hover"></table>
+            </div>
+            
+          </div>
+        </div>
+
       </div>
       
+      
+
       <div class="row">
-        <div class="col-md-5 col-md-offset-3">
-          <div class="alert alert-success text-center" role="alert">{{ .content }}</div>
-          <table id="result" class="table table-hover table-bordered">
-          </table> 
-        </div>
+        
       </div>
+
     </div>
 
 
@@ -41,11 +54,24 @@
     <script type="text/javascript">
       var contentList = {{ .contentList }}
       var table = ""
-      for (var i = 0; i < contentList.length; ++i) {
-        if (i % 5 == 0) table += "<tr>"
-        table += "<td>"+contentList[i]+"</td>"
-        if (i % 5 == 0) table += "</tr>"
+      if (contentList != null) {
+        if (contentList.length >= 5) {
+          table += "<tr><td>" + contentList[0] + "</td>"
+          for (var i = 1; i < contentList.length; ++i) {
+            if (i % 5 == 0) table += "</tr><tr>"
+            table += "<td>"+contentList[i]+"</td>"
+          }
+          table += "</tr>"
+        }
+        else {
+          table += "<tr><td>"
+          for (var i = 0; i < contentList.length; ++i) {
+            table += contentList[i] + " "
+          }
+          table += "</td></tr>"
+        }
       }
+      
       $("#result").append(table);
     </script>
   </body>

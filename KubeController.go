@@ -43,6 +43,7 @@ func main() {
 
     //kube get controller board, connected to board.htl
     app.Get("/board", func (ctx iris.Context) {
+        ctx.ViewData("content","Result Table")
         if err := ctx.View("board.html"); err != nil {
             ctx.StatusCode(iris.StatusInternalServerError)
             ctx.WriteString(err.Error())
@@ -66,6 +67,7 @@ func main() {
 
         contentList := strings.Fields(content)
         ctx.ViewData("contentList",contentList)
+        ctx.ViewData("content","Result Table")
         if err = ctx.View("board.html"); err != nil {
             ctx.StatusCode(iris.StatusInternalServerError)
             ctx.WriteString(err.Error()) 
