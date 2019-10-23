@@ -10,6 +10,7 @@ package main
 
 func getKubeResult(kubeGetCommandId string, kube *Kube) (content string, err error, log string) {
 	var contentStream []byte
+	//kubevtl and docker get commands
 	if kubeGetCommandId == "0" {
 		contentStream, err = kube.getNodes()
 		log = "getnodes"
@@ -28,6 +29,12 @@ func getKubeResult(kubeGetCommandId string, kube *Kube) (content string, err err
 	} else if kubeGetCommandId == "5" {
 		contentStream, err = kube.getClusters()
 		log = "getclusters"
+	} else if kubeGetCommandId == "d0" {
+		contentStream, err = kube.getImages()
+		log = "getimages"
+	} else if kubeGetCommandId == "d1" {
+		contentStream, err = kube.getContainers()
+		log = "getcontainers"
 	}
 	content = string(contentStream)
 	return content,err,log

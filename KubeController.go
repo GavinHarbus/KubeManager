@@ -34,14 +34,13 @@ func main() {
     }
 
     app.Get("/", func (ctx iris.Context) {
-        ctx.ViewData("message","Welcome to KubeManager!")
         if err := ctx.View("index.html"); err != nil {
             ctx.StatusCode(iris.StatusInternalServerError)
             ctx.WriteString(err.Error())
         }
     })
 
-    //kube get controller board, connected to board.htl
+    //kube get controller board, connected to board.html
     app.Get("/board", func (ctx iris.Context) {
         ctx.ViewData("content","Result Table")
         if err := ctx.View("board.html"); err != nil {
@@ -50,7 +49,15 @@ func main() {
         }
     })
 
-    app.Post("get", func (ctx iris.Context) {
+    app.Get("/kubestatus", func (ctx iris.Context) {
+        ctx.ViewData("content","Result Table")
+        if err := ctx.View("kubestatus.html"); err != nil {
+            ctx.StatusCode(iris.StatusInternalServerError)
+            ctx.WriteString(err.Error())
+        }
+    })
+
+    app.Post("getkube", func (ctx iris.Context) {
         kubeGetCommandId := ctx.FormValue("kubegetcommand")
         content, err, log := getKubeResult(kubeGetCommandId, &kube)
 
@@ -74,6 +81,46 @@ func main() {
         }
     })
 
+    //docker get controller board, connected to dockerboard.html
+    app.Get("/dockerboard", func (ctx iris.Context) {
+        ctx.ViewData("content","Result Table")
+        if err := ctx.View("dockerboard.html"); err != nil {
+            ctx.StatusCode(iris.StatusInternalServerError)
+            ctx.WriteString(err.Error())
+        }
+    })
+
+    app.Get("/dockerstatus", func (ctx iris.Context) {
+        ctx.ViewData("content","Result Table")
+        if err := ctx.View("dockerstatus.html"); err != nil {
+            ctx.StatusCode(iris.StatusInternalServerError)
+            ctx.WriteString(err.Error())
+        }
+    })
+
+    app.Post("getdocker", func (ctx iris.Context) {
+        kubeGetCommandId := ctx.FormValue("kubegetcommand")
+        content, err, log := getKubeResult(kubeGetCommandId, &kube)
+
+        app.Logger().Infof(log)
+
+        if err != nil {
+            ctx.ViewData("content",content)
+            if err = ctx.View("dockerboard.html"); err != nil {
+                ctx.StatusCode(iris.StatusInternalServerError)
+                ctx.WriteString(err.Error())
+            }
+            return
+        }
+
+        contentList := strings.Fields(content)
+        ctx.ViewData("contentList",contentList)
+        ctx.ViewData("content","Result Table")
+        if err = ctx.View("dockerboard.html"); err != nil {
+            ctx.StatusCode(iris.StatusInternalServerError)
+            ctx.WriteString(err.Error()) 
+        }
+    })
     
 
     app.Post("upload", func (ctx iris.Context) {

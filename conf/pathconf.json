@@ -1,4 +1,5 @@
 {
 	"systemPath": "/bin/",
-	"kubePath": "/usr/local/bin/"
+	"kubePath": "/usr/local/bin/",
+	"dockerPath": "/usr/local/bin/"
 }

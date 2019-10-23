@@ -21,8 +21,10 @@ const confPath string = "./conf/pathconf.json"
 type Kube struct {
 	SystemPath string `json:"systemPath"`
 	KubePath string `json:"kubePath"`
+	DockerPath string `json:"dockerPath"`
 }
 
+//kubectl commands
 func (kube *Kube) getNodes() (output []byte, err error) {
 	cmd := exec.Command(kube.KubePath+"kubectl","get","nodes")
 	output, err = cmd.CombinedOutput()
@@ -71,8 +73,15 @@ func (kube *Kube) delete(yamlPath string) (output []byte, err error) {
 	return output, err
 }
 
+//docker commands
 func (kube *Kube) getImages() (output []byte, err error) {
-	cmd := exec.Command(kube.KubePath+"docker","images")
+	cmd := exec.Command(kube.DockerPath+"docker","images")
+	output, err = cmd.CombinedOutput()
+	return output, err
+}
+
+func (kube *Kube) getContainers() (output []byte, err error) {
+	cmd := exec.Command(kube.DockerPath+"docker","ps","-a")
 	output, err = cmd.CombinedOutput()
 	return output, err
 }
