@@ -86,14 +86,10 @@ func (kube *Kube) getContainers() (output []byte, err error) {
 	return output, err
 }
 
-func (kube *Kube) getTest() {
-	cmd := exec.Command(kube.SystemPath+"ls")
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println(string(output))
+func (kube *Kube) getYamls() (output []byte, err error) {
+	cmd := exec.Command(kube.SystemPath+"ls","yamls")
+	output, err = cmd.CombinedOutput()
+	return output, err
 }
 
 func (kube *Kube) load() bool {

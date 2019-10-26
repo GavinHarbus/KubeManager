@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>KubeManager</title>
+    <meta charset="utf-8"/>
+    <meta content="user-scalable=1,initial-scale=1,minimum-scale=1" name="viewport"/>
+    <!-- Bootstrap -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <!--<link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700" rel="stylesheet"/>-->
+  </head>
+
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <!--<div class="col-md-1 col-md-offset-3">
+          <form action="/getkube" method="post">
+            <div class="btn-group-vertical" role="group">
+              <button type="submit" class="btn btn-default" name="kubegetcommand" value="0">GetNode</button>
+              <button type="submit" class="btn btn-default" name="kubegetcommand" value="1">GetRc</button>
+              <button type="submit" class="btn btn-default" name="kubegetcommand" value="2">GetPod</button>
+              <button type="submit" class="btn btn-default" name="kubegetcommand" value="3">GetSvc</button>
+              <button type="submit" class="btn btn-default" name="kubegetcommand" value="4">GetJob</button>
+              <button type="submit" class="btn btn-default" name="kubegetcommand" value="5">GetCluster</button>
+            </div>
+          </form>  
+        </div>-->
+
+        <div class="col-md-5 col-md-offset-1">
+          <div class="panel panel-default">
+            <!-- Default panel contents -->
+            <div class="panel-heading text-center">Yamls</div>
+            
+            <form action="/getkube" method="post">
+            <div id="yamlschoose"></div>
+          </div>
+          <div class="btn-group" role="group">
+              <button type="submit" class="btn btn-default" name="kubegetcommand" value="0">Create</button>
+              <button type="submit" class="btn btn-default" name="kubegetcommand" value="1">Delete</button>
+            </div>
+            </form>  
+        </div>
+
+        <div class="col-md-5">
+          <div class="panel panel-default">
+            <!-- Default panel contents -->
+            <div class="panel-heading text-center">Pod status</div>
+            <div class="table-responsive">
+              <table id="podsList" class="table table-condensed table-bordered table-hover"></table>
+            </div>
+          </div>
+          <form action="/podsoperation" method="get">
+            <div class="btn-group" role="group">
+              <button type="submit" class="btn btn-default">Reflush</button>
+            </div>
+          </form>  
+        </div>
+      </div>
+      
+      </br>
+
+      <div class="row">
+        <div class="col-md-5 col-md-offset-1">
+          <div class="panel panel-default">
+            <!-- Default panel contents -->
+            <div class="panel-heading text-center">Rcs status</div>
+            
+            <div class="table-responsive">
+              <table id="rcsList" class="table table-condensed table-bordered table-hover"></table>
+            </div>
+          </div>
+          <form action="/podsoperation" method="get">
+            <div class="btn-group" role="group">
+              <button type="submit" class="btn btn-default">Reflush</button>
+            </div>
+          </form>  
+        </div>
+
+        <div class="col-md-5">
+          <div class="panel panel-default">
+            <!-- Default panel contents -->
+            <div class="panel-heading text-center">Service status</div>
+            
+            <div class="table-responsive">
+              <table id="servicesList" class="table table-condensed table-bordered table-hover"></table>
+            </div>
+          </div>
+          <form action="/podsoperation" method="get">
+            <div class="btn-group" role="group">
+              <button type="submit" class="btn btn-default">Reflush</button>
+            </div>
+          </form> 
+        </div>
+      </div>
+
+      </br>
+
+      <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+          <form action="uploadyaml" enctype="multipart/form-data" method="post">
+            <h3 class="text-center">Edit yaml</h3>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+          <textarea class="form-control" rows="10" name="textyaml" id="textyaml"></textarea>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="col-md-3 col-md-offset-3">
+            <div class="form-group">
+              <label for="Yaml">Yaml upload</label>
+              <input type="file" name="fileyaml" accept=".yaml">
+              <p class="help-block">Please upload your yaml.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <button class="btn btn-default" type="submit">Submit</button>
+          </form>
+        </div>
+      </div>      
+
+    </div>
+
+
+    <script src="/static/js/jquery-2.2.4.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+    function display(id,contentList) {
+      var table = ""
+      if (contentList != null) {
+        if (contentList.length >= 6) {
+          table += "<tr><td>" + contentList[0] + "</td>"
+          for (var i = 1; i < contentList.length; ++i) {
+            if (i % 6 == 0) table += "</tr><tr>"
+            table += "<td>"+contentList[i]+"</td>"
+          }
+          table += "</tr>"
+        }
+        else {
+          table += "<tr><td>"
+          for (var i = 0; i < contentList.length; ++i) {
+            table += contentList[i] + " "
+          }
+          table += "</td></tr>"
+        }
+      }
+      
+      $(id).append(table);
+    }
+
+
+      var contentList = {{ .contentList }}
+      var yamlschoose = ""
+      for (var i = 0; i < contentList.length; ++i) {
+        yamlschoose += '<div class="ratio"><label><input type="radio" name="optionsRadios" value='+contentList[i]+'>  '
+        + contentList[i] + '</label></div>'
+      }
+      $("#yamlschoose").append(yamlschoose)
+
+      var podsList = {{ .podsList }}
+      display("#podsList",podsList)
+
+      var rcsList = {{ .rcsList }}
+      display("#rcsList",rcsList)
+
+      var servicesList = {{ .servicesList }}
+      display("#servicesList",servicesList)
+
+      var textyaml = {{ .textyaml }}
+      $("#textyaml").text(textyaml)
+    </script>
+  </body>
+</html>

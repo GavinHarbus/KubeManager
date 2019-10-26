@@ -35,6 +35,9 @@ func getKubeResult(kubeGetCommandId string, kube *Kube) (content string, err err
 	} else if kubeGetCommandId == "d1" {
 		contentStream, err = kube.getContainers()
 		log = "getcontainers"
+	} else if kubeGetCommandId == "yaml" {
+		contentStream, err = kube.getYamls()
+		log = "getyaml"
 	}
 	content = string(contentStream)
 	return content,err,log

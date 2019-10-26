@@ -3,7 +3,7 @@ package main
 import (
     "io"
     "os"
-    "os/exec"
+    "io/ioutil"
     "time"
     "strings"
 
@@ -50,7 +50,6 @@ func main() {
     })
 
     app.Get("/kubestatus", func (ctx iris.Context) {
-        ctx.ViewData("content","Result Table")
         if err := ctx.View("kubestatus.html"); err != nil {
             ctx.StatusCode(iris.StatusInternalServerError)
             ctx.WriteString(err.Error())
@@ -91,7 +90,6 @@ func main() {
     })
 
     app.Get("/dockerstatus", func (ctx iris.Context) {
-        ctx.ViewData("content","Result Table")
         if err := ctx.View("dockerstatus.html"); err != nil {
             ctx.StatusCode(iris.StatusInternalServerError)
             ctx.WriteString(err.Error())
@@ -122,45 +120,99 @@ func main() {
         }
     })
     
-
-    app.Post("upload", func (ctx iris.Context) {
-        file, _, err := ctx.FormFile("upload")
-        if err != nil {
+    //kubectl create and delete pods
+    app.Get("/podsoperation", func (ctx iris.Context) {
+        if err := ctx.View("podsoperations.html"); err != nil {
             ctx.StatusCode(iris.StatusInternalServerError)
-            ctx.ViewData("message","Upload failed!")
-            ctx.View("index.html")
+            ctx.WriteString(err.Error())
+        }
+    })
+
+    app.Get("/cdpods", func (ctx iris.Context) {
+        content, err, log := getKubeResult("yaml", &kube)
+        app.Logger().Infof(log)
+
+        pods, err, log := getKubeResult("2", &kube)
+        app.Logger().Infof(log)
+
+        rcs, err, log := getKubeResult("1", &kube)
+        app.Logger().Infof(log)
+
+        services, err, log := getKubeResult("3", &kube)
+        app.Logger().Infof(log)
+
+        if err != nil {
+            if err = ctx.View("cdpods.html"); err != nil {
+                ctx.StatusCode(iris.StatusInternalServerError)
+                ctx.WriteString(err.Error())
+            }
             return
         }
 
-        defer file.Close()
+        contentList := strings.Fields(content)
+        podsList := strings.Fields(pods)
+        rcsList := strings.Fields(rcs)
+        servicesList := strings.Fields(services)
 
-        //filename := info.Filename
-        filename := time.Now().Format("20060102150405")
+        ctx.ViewData("textyaml","")
+        ctx.ViewData("contentList",contentList)
+        ctx.ViewData("podsList",podsList)
+        ctx.ViewData("rcsList",rcsList)
+        ctx.ViewData("servicesList",servicesList)
 
-        out, err := os.OpenFile("./static/pics/"+string(filename)+".jpg", os.O_WRONLY|os.O_CREATE, 0666)
-        if err != nil {
+        if err = ctx.View("cdpods.html"); err != nil {
             ctx.StatusCode(iris.StatusInternalServerError)
-            ctx.ViewData("message","Save failed!")
-            ctx.View("index.html")
-            return
+            ctx.WriteString(err.Error()) 
         }
-        defer out.Close()
 
-        io.Copy(out,file)
+    })
 
-        cmd := exec.Command("./pictrans.py", "--input", filename)
-        _, err = cmd.Output()
+    app.Post("uploadyaml", func (ctx iris.Context) {   
+        if file, info, err := ctx.FormFile("fileyaml"); err == nil {
+            defer file.Close()
+            filename := info.Filename
+            out, err := os.OpenFile("./yamls/"+filename, os.O_WRONLY|os.O_CREATE, 0666)
+            defer out.Close()
+            io.Copy(out,file)
 
-        if err != nil {
-            ctx.ViewData("message","Transform failed!")
-            ctx.View("index.html")
-            return
+            content, err, log := getKubeResult("yaml", &kube)
+            app.Logger().Infof(log)
+
+            textyaml, _ := ioutil.ReadFile("./yamls/"+filename)
+            ctx.ViewData("textyaml",string(textyaml))
+            ctx.ViewData("content",content)
+            if err = ctx.View("cdpods.html"); err != nil {
+                ctx.StatusCode(iris.StatusInternalServerError)
+                ctx.WriteString(err.Error())
+                return
+            }
+        } else if textyaml := ctx.FormValue("textyaml"); textyaml != "" {
+            filename := time.Now().Format("20060102150405")
+            out, err := os.OpenFile("./yamls/"+string(filename)+".yaml", os.O_WRONLY|os.O_CREATE, 0666)
+            defer out.Close()
+            out.WriteString(textyaml)
+
+            content, err, log := getKubeResult("yaml", &kube)
+            app.Logger().Infof(log)
+
+            ctx.ViewData("textyaml",string(textyaml))
+            ctx.ViewData("content",content)
+            if err = ctx.View("cdpods.html"); err != nil {
+                ctx.StatusCode(iris.StatusInternalServerError)
+                ctx.WriteString(err.Error())
+                return
+            }
+        } else {
+            ctx.ViewData("textyaml","Input your yamls!")
+            ctx.ViewData("content","Please upload yamls!")
+            if err = ctx.View("cdpods.html"); err != nil {
+                ctx.StatusCode(iris.StatusInternalServerError)
+                ctx.WriteString(err.Error())
+                return
+            }
         }
-        ctx.ViewData("filename",filename+".jpg")
-        ctx.ViewData("rawpath","/static/pics/"+filename+".jpg")
-        ctx.ViewData("respath","/static/pics/res"+filename+".jpg")
-        ctx.ViewData("message","Upload and transform success!")
-        ctx.View("index.html")
+        
+        
     })
 
     app.Run(iris.Addr(":8080"))
