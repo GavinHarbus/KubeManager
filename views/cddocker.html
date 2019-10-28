@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>KubeManager</title>
+    <meta charset="utf-8"/>
+    <meta content="user-scalable=1,initial-scale=1,minimum-scale=1" name="viewport"/>
+    <!-- Bootstrap -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <!--<link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700" rel="stylesheet"/>-->
+  </head>
+
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-6 col-md-offset-3" id="status">
+          <!--<div class="alert alert-warning text-center" role="alert">{{ .status }}</div>-->
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+          <div class="panel panel-default">
+            <!-- Default panel contents -->
+            <div class="panel-heading text-center">Images</div>
+            <form action="/createordelete" method="post">
+            <div id="imageschoose"></div>
+          </div>
+          <div class="row">
+            <div class="col-md-2">
+              <div class="btn-group" role="group">
+                <button type="submit" class="btn btn-default" name="kubecommand" value="0">Pull Image</button>
+              </div>
+              </form> 
+            </div>
+            <div class="col-md-8">
+              <form action="/dockersearch" method="post">
+                <div class="input-group">
+                  <input type="text" class="form-control" placeholder="Search for..." name="imagename">
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">Search</button>
+                  </span>
+                </div>
+              </form>
+            </div>
+          </div>
+          
+       </div>
+      </div>
+      
+      </br>
+
+      <div class="row">
+        <div class="col-md-5 col-md-offset-1">
+          <div class="panel panel-default">
+            <!-- Default panel contents -->
+            <div class="panel-heading text-center">Containiers status</div>
+            
+            <div class="table-responsive">
+              <table id="containiersList" class="table table-condensed table-bordered table-hover"></table>
+            </div>
+          </div>
+          <form action="/cdpods" method="get">
+            <div class="btn-group" role="group">
+              <button type="submit" class="btn btn-default">Refresh</button>
+              <button type="submit" class="btn btn-default">Delete</button>
+            </div>
+          </form>  
+        </div>
+
+        <div class="col-md-5">
+          <div class="panel panel-default">
+            <!-- Default panel contents -->
+            <div class="panel-heading text-center">Images status</div>
+            <div class="table-responsive">
+              <table id="imagesList" class="table table-condensed table-bordered table-hover"></table>
+            </div>
+          </div>
+          <form action="/cdpods" method="get">
+            <div class="btn-group" role="group">
+              <button type="submit" class="btn btn-default">Run</button>
+              <button type="submit" class="btn btn-default">Delete</button>
+            </div>
+          </form>  
+        </div>
+      </div>
+
+      </div>
+  
+    </div>
+
+
+    <script src="/static/js/jquery-2.2.4.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+    function display(id,contentList) {
+      var table = ""
+      if (contentList != null) {
+        if (contentList.length >= 6) {
+          table += "<tr><td>" + contentList[0] + "</td>"
+          for (var i = 1; i < contentList.length; ++i) {
+            if (i % 9 == 0) table += "</tr><tr>"
+            table += "<td>"+contentList[i]+"</td>"
+          }
+          table += "</tr>"
+        }
+        else {
+          table += "<tr><td>"
+          for (var i = 0; i < contentList.length; ++i) {
+            table += contentList[i] + " "
+          }
+          table += "</td></tr>"
+        }
+      }
+      
+      $(id).append(table);
+    }
+
+      var contentList = {{ .imagesList }}
+
+      var table = ""
+      if (contentList != null) {
+        if (contentList.length >= 5) {
+          table += "<tr><td>REPOSITORY</td><td>TAG</td><td>IMAGE ID</td><td>CREATED</td><td>SIZE</td></tr>"
+          contentList = contentList.slice(6)
+          table += "<tr><td>" + contentList[0]
+          for (var i = 1; i < contentList.length; ++i) {
+            if (i % 7 == 0) {
+              table += "</tr><tr>";
+              table += "<td>"+contentList[i]+"</td>";
+            }
+            else if (i % 7 % 3 == 0) table += "<td>"+contentList[i];
+            else if (i % 7 % 4 == 0) table += " "+contentList[i];
+            else if (i % 7 % 5 == 0) table += " "+contentList[i]+"</td>";
+            else table += "<td>"+contentList[i]+"</td>"
+          }
+          table += "</tr>"
+        }
+        else {
+          table += "<tr><td>"
+          for (var i = 0; i < contentList.length; ++i) {
+            table += contentList[i] + " "
+          }
+          table += "</td></tr>"
+        }
+      }
+      $("#imagesList").append(table)
+
+      var containiersList = {{ .containiersList }}
+      display("#containiersList",containiersList)
+
+      var imagesChooseList = {{ .imagesChoose }}
+      var images = ""
+      for (var i = 0; i < imagesChooseList.length; ++i) {
+        images += '<div class="ratio"><label><input type="radio" name="yamlname" value='+imagesChooseList[i]+'>  ' + imagesChooseList[i] + '</label></div>'
+      }
+      $("#imageschoose").append(images)
+
+      //show the create or delete status
+      var status = {{ .status }}
+      if (status != "null") {
+        content = '<div class="alert alert-danger text-center" role="danger">'
+        content += status
+        content += '</div>'
+        $("#status").append(content)
+      }
+    </script>
+  </body>
+</html>

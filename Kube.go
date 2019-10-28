@@ -14,6 +14,7 @@ import (
 	"encoding/json"
 	"os/exec"
 	"io/ioutil"
+	//"strings"
 )
 
 const confPath string = "./conf/pathconf.json"
@@ -82,6 +83,24 @@ func (kube *Kube) getImages() (output []byte, err error) {
 
 func (kube *Kube) getContainers() (output []byte, err error) {
 	cmd := exec.Command(kube.DockerPath+"docker","ps","-a")
+	output, err = cmd.CombinedOutput()
+	return output, err
+}
+
+func (kube *Kube) search(imageName string) (output []byte, err error) {
+	cmd := exec.Command(kube.DockerPath+"docker","search",imageName)
+	output, err = cmd.CombinedOutput()
+	return output, err
+}
+
+func (kube *Kube) pull(imageName string) (output []byte, err error) {
+	cmd := exec.Command(kube.DockerPath+"docker","pull",imageName)
+	output, err = cmd.CombinedOutput()
+	return output, err
+}
+
+func (kube *Kube) run(imageName string) (output []byte, err error) {
+	cmd := exec.Command(kube.DockerPath+"docker","run","-it",imageName)
 	output, err = cmd.CombinedOutput()
 	return output, err
 }

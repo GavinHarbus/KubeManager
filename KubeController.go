@@ -315,5 +315,84 @@ func main() {
         ctx.View("cdpods.html")
     })
 
+    //docker operations
+    app.Get("/dockeroperation", func (ctx iris.Context) {
+        if err := ctx.View("dockeroperation.html"); err != nil {
+            ctx.StatusCode(iris.StatusInternalServerError)
+            ctx.WriteString(err.Error())
+        }
+    })
+
+    app.Get("/cddocker", func (ctx iris.Context) {
+        images, err, log := getKubeResult("d0", &kube)
+        app.Logger().Infof(log)
+
+        containiers, err, log := getKubeResult("d1", &kube)
+        app.Logger().Infof(log)
+
+        if err != nil {
+            if err = ctx.View("cddocker.html"); err != nil {
+                ctx.StatusCode(iris.StatusInternalServerError)
+                ctx.WriteString(err.Error())
+            }
+            return
+        }
+
+        imagesList := strings.Fields(images)
+        containiersList := strings.Fields(containiers)
+
+        ctx.ViewData("imagesList",imagesList)
+        ctx.ViewData("containiersList",containiersList)
+
+        if err = ctx.View("cddocker.html"); err != nil {
+            ctx.StatusCode(iris.StatusInternalServerError)
+            ctx.WriteString(err.Error()) 
+        }
+
+    })
+
+    app.Post("/dockersearch", func (ctx iris.Context) {
+        images, err, log := getKubeResult("d0", &kube)
+        app.Logger().Infof(log)
+
+        containiers, err, log := getKubeResult("d1", &kube)
+        app.Logger().Infof(log)
+
+        if err != nil {
+            if err = ctx.View("cddocker.html"); err != nil {
+                ctx.StatusCode(iris.StatusInternalServerError)
+                ctx.WriteString(err.Error())
+            }
+            return
+        }
+
+        imagesList := strings.Fields(images)
+        containiersList := strings.Fields(containiers)
+
+        ctx.ViewData("imagesList",imagesList)
+        ctx.ViewData("containiersList",containiersList)
+
+        imageName := ctx.FormValue("imagename")
+        if imageName != "" {
+            app.Logger().Infof("docker search")
+            content, _ := kube.search(imageName)
+            contentList := strings.Split(string(content),"\n")
+
+            var imageNameList []string
+
+            for i := 0; i < len(contentList)-1; i++ {
+                imageNameList = append(imageNameList,strings.Fields(contentList[i])[0])
+            }
+
+            ctx.ViewData("imagesChoose",imageNameList)
+        }
+
+        if err = ctx.View("cddocker.html"); err != nil {
+            ctx.StatusCode(iris.StatusInternalServerError)
+            ctx.WriteString(err.Error()) 
+        }
+
+    })
+
     app.Run(iris.Addr(":8080"))
 }
