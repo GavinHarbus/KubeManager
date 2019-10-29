@@ -114,13 +114,25 @@ func main() {
             return
         }
 
-        contentList := pcaStringLists(regx.FindAllStringSubmatch(content,-1))
-        ctx.ViewData("contentList",contentList)
-        ctx.ViewData("content","Result Table")
-        if err = ctx.View("dockerboard.html"); err != nil {
-            ctx.StatusCode(iris.StatusInternalServerError)
-            ctx.WriteString(err.Error()) 
+        if kubeGetCommandId == "d0" {
+            contentList := pcaStringLists(regx.FindAllStringSubmatch(content,-1))
+            ctx.ViewData("contentList",contentList)
+            ctx.ViewData("content","Result Table")
+            if err = ctx.View("dockerboard.html"); err != nil {
+                ctx.StatusCode(iris.StatusInternalServerError)
+                ctx.WriteString(err.Error()) 
+            }
+        } else {
+            contentList := pcaStringLists(regx.FindAllStringSubmatch(content,-1))
+            ctx.ViewData("containiersList",contentList)
+            ctx.ViewData("content","Result Table")
+            if err = ctx.View("dockerboard.html"); err != nil {
+                ctx.StatusCode(iris.StatusInternalServerError)
+                ctx.WriteString(err.Error()) 
+            }
         }
+
+        
     })
     
     //kubectl create and delete pods
