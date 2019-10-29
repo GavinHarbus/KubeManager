@@ -5,6 +5,7 @@ import (
     "os"
     "io/ioutil"
     "time"
+    "regexp"
     "strings"
 
     "github.com/kataras/iris"
@@ -32,6 +33,8 @@ func main() {
         app.Logger().Infof("Cannot load your kube path config!")
         return
     }
+    //prepare the regx
+    regx, _ := regexp.Compile("\\S{1,} {1}\\S{1,} {1}\\S{1,}|\\S{1,} {1}\\S{1,}|\\S{1,}")
 
     app.Get("/", func (ctx iris.Context) {
         if err := ctx.View("index.html"); err != nil {
@@ -71,7 +74,7 @@ func main() {
             return
         }
 
-        contentList := strings.Fields(content)
+        contentList := pcaStringLists(regx.FindAllStringSubmatch(content,-1))
         ctx.ViewData("contentList",contentList)
         ctx.ViewData("content","Result Table")
         if err = ctx.View("board.html"); err != nil {
@@ -111,7 +114,7 @@ func main() {
             return
         }
 
-        contentList := strings.Fields(content)
+        contentList := pcaStringLists(regx.FindAllStringSubmatch(content,-1))
         ctx.ViewData("contentList",contentList)
         ctx.ViewData("content","Result Table")
         if err = ctx.View("dockerboard.html"); err != nil {
@@ -149,10 +152,10 @@ func main() {
             return
         }
 
-        contentList := strings.Fields(content)
-        podsList := strings.Fields(pods)
-        rcsList := strings.Fields(rcs)
-        servicesList := strings.Fields(services)
+        contentList := pcaStringLists(regx.FindAllStringSubmatch(content,-1))
+        podsList := pcaStringLists(regx.FindAllStringSubmatch(pods,-1))
+        rcsList := pcaStringLists(regx.FindAllStringSubmatch(rcs,-1))
+        servicesList := pcaStringLists(regx.FindAllStringSubmatch(services,-1))
 
         ctx.ViewData("textyaml","")
         ctx.ViewData("contentList",contentList)
@@ -186,9 +189,9 @@ func main() {
             return
         }
 
-        podsList := strings.Fields(pods)
-        rcsList := strings.Fields(rcs)
-        servicesList := strings.Fields(services)
+        podsList := pcaStringLists(regx.FindAllStringSubmatch(pods,-1))
+        rcsList := pcaStringLists(regx.FindAllStringSubmatch(rcs,-1))
+        servicesList := pcaStringLists(regx.FindAllStringSubmatch(services,-1))
 
         ctx.ViewData("textyaml","")
         ctx.ViewData("podsList",podsList)
@@ -212,7 +215,7 @@ func main() {
 
             content, err, log := getKubeResult("yaml", &kube)
             app.Logger().Infof(log)
-            contentList := strings.Fields(content)
+            contentList := pcaStringLists(regx.FindAllStringSubmatch(content,-1))
             ctx.ViewData("contentList",contentList)
 
             if err = ctx.View("cdpods.html"); err != nil {
@@ -234,7 +237,7 @@ func main() {
 
             content, err, log := getKubeResult("yaml", &kube)
             app.Logger().Infof(log)
-            contentList := strings.Fields(content)
+            contentList := pcaStringLists(regx.FindAllStringSubmatch(content,-1))
             ctx.ViewData("contentList",contentList)
 
             if err = ctx.View("cdpods.html"); err != nil {
@@ -248,7 +251,7 @@ func main() {
 
             content, err, log := getKubeResult("yaml", &kube)
             app.Logger().Infof(log)
-            contentList := strings.Fields(content)
+            contentList := pcaStringLists(regx.FindAllStringSubmatch(content,-1))
             ctx.ViewData("contentList",contentList)
 
             if err = ctx.View("cdpods.html"); err != nil {
@@ -301,10 +304,10 @@ func main() {
             return
         }
 
-        contentList := strings.Fields(content)
-        podsList := strings.Fields(pods)
-        rcsList := strings.Fields(rcs)
-        servicesList := strings.Fields(services)
+        contentList := pcaStringLists(regx.FindAllStringSubmatch(content,-1))
+        podsList := pcaStringLists(regx.FindAllStringSubmatch(pods,-1))
+        rcsList := pcaStringLists(regx.FindAllStringSubmatch(rcs,-1))
+        servicesList := pcaStringLists(regx.FindAllStringSubmatch(services,-1))
 
         ctx.ViewData("textyaml","")
         ctx.ViewData("contentList",contentList)
@@ -338,8 +341,8 @@ func main() {
             return
         }
 
-        imagesList := strings.Fields(images)
-        containiersList := strings.Fields(containiers)
+        imagesList := pcaStringLists(regx.FindAllStringSubmatch(images,-1))
+        containiersList := pcaStringLists(regx.FindAllStringSubmatch(containiers,-1))
 
         ctx.ViewData("imagesList",imagesList)
         ctx.ViewData("containiersList",containiersList)
@@ -366,8 +369,8 @@ func main() {
             return
         }
 
-        imagesList := strings.Fields(images)
-        containiersList := strings.Fields(containiers)
+        imagesList := pcaStringLists(regx.FindAllStringSubmatch(images,-1))
+        containiersList := pcaStringLists(regx.FindAllStringSubmatch(containiers,-1))
 
         ctx.ViewData("imagesList",imagesList)
         ctx.ViewData("containiersList",containiersList)

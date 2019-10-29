@@ -42,3 +42,10 @@ func getKubeResult(kubeGetCommandId string, kube *Kube) (content string, err err
 	content = string(contentStream)
 	return content,err,log
 }
+
+func pcaStringLists(temp [][]string) (res []string) {
+	for i := 0; i < len(temp); i++ {
+		res = append(res,temp[i][0])
+	}
+	return res
+}
