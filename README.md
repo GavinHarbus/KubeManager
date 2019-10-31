@@ -18,12 +18,31 @@ git clone https://github.com/GavinHarbus/KubeManager.git
 
 #### Usage
 
-```shell
-cd ~/KubeManager
-go build KubeController.go Kube.go util.go
-chmod +x Kube
-./Kube
-```
+1. set the path
+	
+	```shell
+	cd ~/KubeManager
+	vim conf/pathconf.json
+	```
+	
+	please replace the rawpath with your own path
+	
+	```json
+	{
+		"systemPath": "/bin/",
+		"kubePath": "/usr/local/bin/",
+		"dockerPath": "/usr/local/bin/"
+	}
+
+	```
+2. start the service
+
+	```shell
+	cd ~/KubeManager
+	go build KubeController.go Kube.go util.go
+	chmod +x Kube
+	./Kube
+	```
 
 #### Preview
 
