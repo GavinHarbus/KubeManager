@@ -53,15 +53,27 @@
     <script src="/static/js/bootstrap.min.js"></script>
     <script type="text/javascript">
       var contentList = {{ .contentList }}
+      var commandid = {{ .commandid }}
+      function display(id,contentList,type) {
       var table = ""
       if (contentList != null) {
         if (contentList.length >= 5) {
-          table += "<tr><td>" + contentList[0] + "</td>"
-          for (var i = 1; i < contentList.length; ++i) {
-            if (i % 5 == 0) table += "</tr><tr>"
-            table += "<td>"+contentList[i]+"</td>"
+          if (type == "0" || type == "1" || type == "2") {
+            table += "<tr><td>" + contentList[0] + "</td>"
+            for (var i = 1; i < contentList.length; ++i) {
+              if (i % 5 == 0) table += "</tr><tr>"
+              table += "<td>"+contentList[i]+"</td>"
+            }
+            table += "</tr>"
           }
-          table += "</tr>"
+          else if (type == "3") {
+            table += "<tr><td>" + contentList[0] + "</td>"
+            for (var i = 1; i < contentList.length; ++i) {
+              if (i % 6 == 0) table += "</tr><tr>"
+              table += "<td>"+contentList[i]+"</td>"
+            }
+            table += "</tr>"
+          }
         }
         else {
           table += "<tr><td>"
@@ -72,7 +84,11 @@
         }
       }
       
-      $("#result").append(table);
+      $(id).append(table);
+    }
+
+    display("#result",contentList,commandid);
+      
     </script>
   </body>
 </html>

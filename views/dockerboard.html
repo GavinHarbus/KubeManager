@@ -48,21 +48,57 @@
     <script src="/static/js/jquery-2.2.4.min.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>
     <script type="text/javascript">
+      function display(id, contentList) {
+        var table = ""
+        if (contentList != null) {
+          if (contentList.length >= 7) {
+            table += "<tr><td>CONTAINER ID</td><td>IMAGE</td><td>COMMAND</td><td>CREATED</td><td>STATUS</td><td>PORTS</td><td>NAMES</td></tr>"
+            var i = 7;
+            while (i < contentList.length) {
+              table += "<tr>";
+              //          id                          image                    command
+              table += "<td>" + contentList[i] + "</td><td>" + contentList[i + 1] + "</td><td>" + contentList[i + 2]
+                //created time                 //staus
+                + "</td><td>" + contentList[i + 3] + "</td><td>" + contentList[i + 4] + "</td>";
+              i += 5;
+              //is ports exist?
+              var pattern = /^[a-zA-Z0-9]{12}$/;
+              if (pattern.test(contentList[i])) {
+                table += "<td>" + contentList[i] + "</td>";
+                ++i;
+              }
+              else {
+                table += "<td> </td>";
+              }
+              table += "<td>" + contentList[i] + "</tr>";
+              ++i;
+            }
+
+          }
+        }
+        else {
+         
+        }
+        $("#result").append(table);
+      }
+      var containiersList = {{ .containiersList }}
+      display("#containiersList", containiersList)
+
       var contentList = {{ .contentList }}
       var table = ""
       if (contentList != null) {
         if (contentList.length >= 5) {
           table += "<tr><td>REPOSITORY</td><td>TAG</td><td>IMAGE ID</td><td>CREATED</td><td>SIZE</td></tr>"
-          contentList = contentList.slice(6)
+          contentList = contentList.slice(5)
           table += "<tr><td>" + contentList[0]
           for (var i = 1; i < contentList.length; ++i) {
-            if (i % 7 == 0) {
+            if (i % 5 == 0) {
               table += "</tr><tr>";
               table += "<td>"+contentList[i]+"</td>";
             }
-            else if (i % 7 % 3 == 0) table += "<td>"+contentList[i];
-            else if (i % 7 % 4 == 0) table += " "+contentList[i];
-            else if (i % 7 % 5 == 0) table += " "+contentList[i]+"</td>";
+            else if (i % 5 % 1 == 0) table += "<td>"+contentList[i];
+            else if (i % 5 % 2 == 0) table += " "+contentList[i];
+            else if (i % 5 % 3 == 0) table += " "+contentList[i]+"</td>";
             else table += "<td>"+contentList[i]+"</td>"
           }
           table += "</tr>"

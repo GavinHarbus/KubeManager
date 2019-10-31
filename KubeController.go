@@ -27,6 +27,10 @@ func main() {
     app.RegisterView(templates)
     app.StaticWeb("/static","./static")
 
+    /*fileserver := iris.FileServer("./static")
+    h := iris.StripPrefix("/static", fileserver)
+    app.Get("/static/{f:path}", h)*/
+
     //init the kube class
     var kube Kube
     if !kube.load() {
@@ -34,7 +38,7 @@ func main() {
         return
     }
     //prepare the regx
-    regx, _ := regexp.Compile("\\S{1,} {1}\\S{1,} {1}\\S{1,}|\\S{1,} {1}\\S{1,}|\\S{1,}")
+    regx, _ := regexp.Compile("\\S{1,} {1}\\S{1,} {1}\\S{1,} {1}\\S{1,} {1}\\S{1,} {1}\\S{1,} {1}\\S{1,}|\\S{1,} {1}\\S{1,} {1}\\S{1,} {1}\\S{1,} {1}\\S{1,}|\\S{1,} {1}\\S{1,} {1}\\S{1,}|\\S{1,} {1}\\S{1,}|\\S{1,}")
 
     app.Get("/", func (ctx iris.Context) {
         if err := ctx.View("index.html"); err != nil {
@@ -76,6 +80,7 @@ func main() {
 
         contentList := pcaStringLists(regx.FindAllStringSubmatch(content,-1))
         ctx.ViewData("contentList",contentList)
+        ctx.ViewData("commandid",kubeGetCommandId)
         ctx.ViewData("content","Result Table")
         if err = ctx.View("board.html"); err != nil {
             ctx.StatusCode(iris.StatusInternalServerError)
@@ -132,7 +137,6 @@ func main() {
             }
         }
 
-        
     })
     
     //kubectl create and delete pods
@@ -401,6 +405,116 @@ func main() {
 
             ctx.ViewData("imagesChoose",imageNameList)
         }
+
+        if err = ctx.View("cddocker.html"); err != nil {
+            ctx.StatusCode(iris.StatusInternalServerError)
+            ctx.WriteString(err.Error()) 
+        }
+
+    })
+
+    app.Post("/dcontainiers", func (ctx iris.Context) {
+        containierId := ctx.FormValue("containierid")
+        if containierId != "" {
+            app.Logger().Infof("docker rm")
+            content, _ := kube.rm(containierId)
+            ctx.ViewData("status",string(content))
+        }
+
+        images, err, log := getKubeResult("d0", &kube)
+        app.Logger().Infof(log)
+
+        containiers, err, log := getKubeResult("d1", &kube)
+        app.Logger().Infof(log)
+
+        if err != nil {
+            if err = ctx.View("cddocker.html"); err != nil {
+                ctx.StatusCode(iris.StatusInternalServerError)
+                ctx.WriteString(err.Error())
+            }
+            return
+        }
+
+        imagesList := pcaStringLists(regx.FindAllStringSubmatch(images,-1))
+        containiersList := pcaStringLists(regx.FindAllStringSubmatch(containiers,-1))
+
+        ctx.ViewData("imagesList",imagesList)
+        ctx.ViewData("containiersList",containiersList)
+
+        if err = ctx.View("cddocker.html"); err != nil {
+            ctx.StatusCode(iris.StatusInternalServerError)
+            ctx.WriteString(err.Error()) 
+        }
+
+    })
+
+    app.Post("/rdimages", func (ctx iris.Context) {
+        repository := ctx.FormValue("repository")
+        command := ctx.FormValue("command")
+        if command == "0" {
+            app.Logger().Infof("docker run")
+            content, _ := kube.run(repository)
+            ctx.ViewData("status",string(content))
+            //app.Logger().Infof(string(content))
+        } else {
+            app.Logger().Infof("docker rmi")
+            content, _ := kube.rmi(repository)
+            ctx.ViewData("status",string(content))
+        }
+
+        images, err, log := getKubeResult("d0", &kube)
+        app.Logger().Infof(log)
+
+        containiers, err, log := getKubeResult("d1", &kube)
+        app.Logger().Infof(log)
+
+        if err != nil {
+            if err = ctx.View("cddocker.html"); err != nil {
+                ctx.StatusCode(iris.StatusInternalServerError)
+                ctx.WriteString(err.Error())
+            }
+            return
+        }
+
+        imagesList := pcaStringLists(regx.FindAllStringSubmatch(images,-1))
+        containiersList := pcaStringLists(regx.FindAllStringSubmatch(containiers,-1))
+
+        ctx.ViewData("imagesList",imagesList)
+        ctx.ViewData("containiersList",containiersList)
+
+        if err = ctx.View("cddocker.html"); err != nil {
+            ctx.StatusCode(iris.StatusInternalServerError)
+            ctx.WriteString(err.Error()) 
+        }
+
+    })
+
+    app.Post("/pull", func (ctx iris.Context) {
+        imageName := ctx.FormValue("imagename")
+        
+        app.Logger().Infof("docker pull")
+        content, _ := kube.pull(imageName)
+        ctx.ViewData("status",string(content))
+
+        images, err, log := getKubeResult("d0", &kube)
+        app.Logger().Infof(log)
+
+        containiers, err, log := getKubeResult("d1", &kube)
+        app.Logger().Infof(log)
+
+        if err != nil {
+            if err = ctx.View("cddocker.html"); err != nil {
+                ctx.StatusCode(iris.StatusInternalServerError)
+                ctx.WriteString(err.Error())
+            }
+            return
+        }
+
+        imagesList := pcaStringLists(regx.FindAllStringSubmatch(images,-1))
+        containiersList := pcaStringLists(regx.FindAllStringSubmatch(containiers,-1))
+
+        ctx.ViewData("imagesList",imagesList)
+        ctx.ViewData("containiersList",containiersList)
 
         if err = ctx.View("cddocker.html"); err != nil {
             ctx.StatusCode(iris.StatusInternalServerError)

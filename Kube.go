@@ -101,13 +101,25 @@ func (kube *Kube) pull(imageName string) (output []byte, err error) {
 }
 
 func (kube *Kube) run(imageName string) (output []byte, err error) {
-	cmd := exec.Command(kube.DockerPath+"docker","run","-it",imageName)
+	cmd := exec.Command(kube.DockerPath+"docker","run","-i",imageName)
+	output, err = cmd.CombinedOutput()
+	return output, err
+}
+
+func (kube *Kube) rm(imageName string) (output []byte, err error) {
+	cmd := exec.Command(kube.DockerPath+"docker","rm",imageName)
+	output, err = cmd.CombinedOutput()
+	return output, err
+}
+
+func (kube *Kube) rmi(imageName string) (output []byte, err error) {
+	cmd := exec.Command(kube.DockerPath+"docker","rmi",imageName)
 	output, err = cmd.CombinedOutput()
 	return output, err
 }
 
 func (kube *Kube) getYamls() (output []byte, err error) {
-	cmd := exec.Command(kube.SystemPath+"ls","yamls")
+	cmd := exec.Command(kube.SystemPath+"ls","./yamls")
 	output, err = cmd.CombinedOutput()
 	return output, err
 }
@@ -123,3 +135,12 @@ func (kube *Kube) load() bool {
 	}
 	return false
 }
+
+/*func main() {
+	var kube Kube
+	kube.load()
+	regx, _ := regexp.Compile("\\S{1,} {1}\\S{1,} {1}\\S{1,} {1}\\S{1,} {1}\\S{1,}|\\S{1,} {1}\\S{1,} {1}\\S{1,}|\\S{1,} {1}\\S{1,}|\\S{1,}")
+	out,_ := kube.getContainers()
+	res := regx.FindAllStringSubmatch(string(out),-1)
+	fmt.Println(res)
+}*/
